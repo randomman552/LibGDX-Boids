@@ -1,5 +1,6 @@
 package com.randomman552.boids.boid;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
@@ -10,7 +11,6 @@ import com.randomman552.boids.obstacles.Obstacle;
 import com.randomman552.boids.util.BodyLinkedActor;
 
 import java.util.ArrayList;
-import java.util.Vector;
 
 public class Boid extends BodyLinkedActor {
     private static class BoidRayCastCallback implements RayCastCallback {
@@ -36,6 +36,10 @@ public class Boid extends BodyLinkedActor {
 
     private final ArrayList<Fixture> rayCastFixtures = new ArrayList<>();
 
+    // Multi use vectors (prevent re-creation of objects)
+    private final Vector2 sensePoint = new Vector2();
+    private final Vector2 centerPoint = new Vector2();
+
     public Boid() {
         this(0, 0);
     }
@@ -45,7 +49,7 @@ public class Boid extends BodyLinkedActor {
     }
 
     public Boid(float x, float y, float rotation) {
-        setSize(Constants.SIZE.x, Constants.SIZE.y);
+        setSize(Constants.BOID_SIZE.x, Constants.BOID_SIZE.y);
         setOrigin(Align.center);
 
         // Define body
@@ -54,7 +58,7 @@ public class Boid extends BodyLinkedActor {
 
         body = Boids.getInstance().world.createBody(bodyDef);
         body.setUserData(this);
-        body.setLinearVelocity(0, Constants.VELOCITY);
+        body.setLinearVelocity(0, Constants.BOID_VELOCITY);
 
         // region Create fixtures
 
@@ -130,17 +134,32 @@ public class Boid extends BodyLinkedActor {
         return obstacles.size() > 0;
     }
 
-
+    /**
+     * Get center coordinates of this boid.
+     * NOTE: Always returns the same vector, not a new one.
+     * @return Center point of this boid.
+     */
     private Vector2 getCenterPoint() {
-        return new Vector2(getX() + getOriginX(), getY() + getOriginY());
+        centerPoint.set(getX() + getOriginX(), getY() + getOriginY());
+        return centerPoint;
     }
 
+    /**
+     * Get coordinates of a point along the sensor radius (in front of the boid).
+     * NOTE: Always returns the same vector, not a new one.
+     * @return coordinates of point in front of the boid at the sensor radius distance.
+     */
     private Vector2 getSensePoint() {
         return getSensePoint(0);
     }
 
+    /**
+     * Get coordinates of a point along the sensor radius at the specified angle.
+     * NOTE: Always returns the same vector, not a new one.
+     * @param degrees The angle at which the sense point should be placed.
+     * @return coordinates of point at the specified angle in front of the boid.
+     */
     private Vector2 getSensePoint(float degrees) {
-        Vector2 sensePoint = new Vector2();
         sensePoint.set(0, Constants.BOID_SENSE_RADIUS);
         sensePoint.rotateDeg(getRotation());
         sensePoint.rotateDeg(degrees);
@@ -150,7 +169,7 @@ public class Boid extends BodyLinkedActor {
 
 
     private Vector2 getVelocity() {
-        Vector2 velocity = new Vector2(0, Constants.VELOCITY);
+        Vector2 velocity = new Vector2(0, Constants.BOID_VELOCITY);
         velocity.rotateDeg(getRotation());
         return velocity;
     }
@@ -166,6 +185,12 @@ public class Boid extends BodyLinkedActor {
         shapeRenderer.line(fromPoint, toPoint);
     }
 
+
+    public void turnTowards(float degrees) {
+        float rotationDiff = getRotation() - degrees;
+        float rotationAmount = Gdx.graphics.getDeltaTime() * Constants.BOID_TURN_RATE * Math.copySign(1f, rotationDiff);
+        setRotation(getRotation() - rotationAmount);
+    }
 
     @Override
     public void act(float delta) {
@@ -198,7 +223,7 @@ public class Boid extends BodyLinkedActor {
                     world.rayCast(new BoidRayCastCallback(this), fromPoint, sensePoint);
                     if (!rayCastFixtureDetected()) {
                         drawRay(fromPoint, sensePoint, false);
-                        setRotation(getRotation() + degrees);
+                        turnTowards(getRotation() + degrees);
                         break;
                     } else {
                         drawRay(fromPoint, sensePoint, true);
@@ -209,7 +234,7 @@ public class Boid extends BodyLinkedActor {
                     world.rayCast(new BoidRayCastCallback(this), fromPoint, sensePoint);
                     if (!rayCastFixtureDetected()) {
                         drawRay(fromPoint, sensePoint, false);
-                        setRotation(getRotation() - degrees);
+                        turnTowards(getRotation() - degrees);
                         break;
                     } else {
                         drawRay(fromPoint, sensePoint, true);
