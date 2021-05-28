@@ -58,7 +58,12 @@ public class Boid extends BodyLinkedActor {
 
         body = Boids.getInstance().world.createBody(bodyDef);
         body.setUserData(this);
-        body.setLinearVelocity(0, Constants.BOID_VELOCITY);
+
+        // Set initial velocity based on rotation
+        Vector2 vel = body.getLinearVelocity();
+        vel.set(Constants.BOID_VELOCITY, 0);
+        vel.rotateDeg(rotation);
+        body.setLinearVelocity(vel);
 
         // region Create fixtures
 
@@ -97,10 +102,10 @@ public class Boid extends BodyLinkedActor {
      * @param toAdd The body to add.
      */
     public void addPerceived(Body toAdd) {
-        if (toAdd.getUserData() instanceof Boid) {
+        if (toAdd.getUserData() instanceof Boid && !boids.contains(toAdd)) {
             boids.add(toAdd);
         }
-        else if (toAdd.getUserData() instanceof Obstacle) {
+        else if (toAdd.getUserData() instanceof Obstacle && !obstacles.contains(toAdd)) {
             obstacles.add(toAdd);
         }
     }
@@ -188,24 +193,44 @@ public class Boid extends BodyLinkedActor {
 
     public void turnTowards(float degrees) {
         float rotationDiff = getRotation() - degrees;
-        float rotationAmount = Gdx.graphics.getDeltaTime() * Constants.BOID_TURN_RATE * Math.copySign(1f, rotationDiff);
+        float rotationAmount = (Gdx.graphics.getDeltaTime() * Constants.BOID_TURN_RATE) * Math.copySign(Math.min(rotationDiff, 1f), rotationDiff);
         setRotation(getRotation() - rotationAmount);
     }
 
     @Override
     public void act(float delta) {
         super.act(delta);
+        Vector2 vel = this.body.getLinearVelocity();
 
-        avoidObstacles();
+        // https://www.cs.toronto.edu/~dt/siggraph97-course/cwr87/
 
-        body.setLinearVelocity(getVelocity());
+        // region Velocity matching
+
+        Vector2 avgVel = new Vector2(vel);
+        for (Body body: boids) {
+            avgVel.add(body.getLinearVelocity());
+        }
+        avgVel.x = avgVel.x / (boids.size() + 1);
+        avgVel.y = avgVel.y / (boids.size() + 1);
+
+        // Normalise and scale to velocity matching force
+        avgVel.nor().scl(Constants.VELOCITY_MATCH_FORCE);
+
+        // endregion
+
+        // Set velocity
+        vel.set(avgVel).scl(Constants.BOID_VELOCITY);
+        this.body.setLinearVelocity(vel);
+
+        // Set rotation to align with velocity vector
+        setRotation(vel.angleDeg() - 90);
     }
 
     /**
      * Obstacle avoidance behavior method.
      * Should be called from the act method.
      */
-    private void avoidObstacles() {
+    /*private void avoidObstacles() {
         if (obstaclesToAvoid()) {
             // RayCast forward to see if path is clear.
             World world = Boids.getInstance().world;
@@ -244,5 +269,5 @@ public class Boid extends BodyLinkedActor {
                 drawRay(fromPoint, sensePoint, false);
             }
         }
-    }
+    }*/
 }

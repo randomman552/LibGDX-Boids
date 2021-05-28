@@ -73,7 +73,7 @@ public class Boids extends ApplicationAdapter {
 			stage.addActor(new MapEdge(i));
 		}
 
-		// Spawn 5 boids at random points with random rotations
+		// Spawn boids at random points with random rotations
 		for (int i = 0; i < 500; i++) {
 			float x, y, rotation;
 			x = random.nextFloat() * vp.getWorldWidth();

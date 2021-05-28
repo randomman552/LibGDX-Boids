@@ -24,7 +24,6 @@ public class BodyLinkedActor extends Actor implements Disposable {
     @Override
     protected void rotationChanged() {
         body.setTransform(body.getPosition().x, body.getPosition().y, (float) Math.toRadians(getRotation()));
-        body.setLinearVelocity(body.getLinearVelocity().rotateDeg(getRotation()));
     }
 
     @Override
