@@ -1,6 +1,7 @@
 package com.randomman552.boids.util;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Disposable;
@@ -14,6 +15,20 @@ public class BodyLinkedActor extends Actor implements Disposable {
         super.act(delta);
         setPosition(body.getPosition().x - getOriginX(), body.getPosition().y - getOriginY());
         setRotation((float) Math.toDegrees(body.getAngle()));
+    }
+
+    public void setVelocity(float vx, float vy) {
+        Vector2 vel = body.getLinearVelocity().set(vx, vy);
+        setVelocity(vel);
+    }
+
+    public void setVelocity(Vector2 vel) {
+        body.setLinearVelocity(vel);
+        setRotation(vel.angleDeg() - 90);
+    }
+
+    public Vector2 getVelocity() {
+        return body.getLinearVelocity();
     }
 
     @Override

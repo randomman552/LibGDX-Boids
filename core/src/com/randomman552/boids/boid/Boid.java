@@ -11,6 +11,7 @@ import com.randomman552.boids.obstacles.Obstacle;
 import com.randomman552.boids.util.BodyLinkedActor;
 
 import java.util.ArrayList;
+import java.util.Vector;
 
 public class Boid extends BodyLinkedActor {
     private static class BoidRayCastCallback implements RayCastCallback {
@@ -31,8 +32,8 @@ public class Boid extends BodyLinkedActor {
         }
     }
 
-    private final ArrayList<Body> boids = new ArrayList<>();
-    private final ArrayList<Body> obstacles = new ArrayList<>();
+    private final ArrayList<Body> boids = new ArrayList<>(100);
+    private final ArrayList<Body> obstacles = new ArrayList<>(100);
 
     private final ArrayList<Fixture> rayCastFixtures = new ArrayList<>();
 
@@ -63,7 +64,7 @@ public class Boid extends BodyLinkedActor {
         Vector2 vel = body.getLinearVelocity();
         vel.set(Constants.BOID_VELOCITY, 0);
         vel.rotateDeg(rotation);
-        body.setLinearVelocity(vel);
+        setVelocity(vel);
 
         // region Create fixtures
 
@@ -139,6 +140,7 @@ public class Boid extends BodyLinkedActor {
         return obstacles.size() > 0;
     }
 
+
     /**
      * Get center coordinates of this boid.
      * NOTE: Always returns the same vector, not a new one.
@@ -173,57 +175,77 @@ public class Boid extends BodyLinkedActor {
     }
 
 
-    private Vector2 getVelocity() {
-        Vector2 velocity = new Vector2(0, Constants.BOID_VELOCITY);
-        velocity.rotateDeg(getRotation());
-        return velocity;
-    }
-
-
-    private void drawRay(Vector2 fromPoint, Vector2 toPoint, boolean collides) {
-        ShapeRenderer shapeRenderer = Boids.getInstance().shapeRenderer;
-        if (collides) {
-            shapeRenderer.setColor(1, 0, 0, 1);
-        } else {
-            shapeRenderer.setColor(0, 0, 1, 1);
+    /**
+     * Utility function which clamp the angle of vec to be within the given number of degrees of ref.
+     * @param vec - The vector to clamp
+     * @param ref - Reference to calculate angle too
+     * @param degreesVariance - Maximum degrees of variance
+     */
+    private Vector2 clampAngle(Vector2 vec, Vector2 ref, float degreesVariance) {
+        float turnAngle = vec.angleDeg(ref);
+        if (Math.abs(turnAngle) > degreesVariance) {
+            turnAngle = -Math.copySign(degreesVariance, turnAngle -180);
         }
-        shapeRenderer.line(fromPoint, toPoint);
+        vec.set(ref);
+        vec.rotateDeg(turnAngle);
+
+        return vec;
     }
 
-
-    public void turnTowards(float degrees) {
-        float rotationDiff = getRotation() - degrees;
-        float rotationAmount = (Gdx.graphics.getDeltaTime() * Constants.BOID_TURN_RATE) * Math.copySign(Math.min(rotationDiff, 1f), rotationDiff);
-        setRotation(getRotation() - rotationAmount);
+    /**
+     * @param delta Time between this frame and the last.
+     * @param vec The vector to turn towards (MUST BE NORMALISED)
+     */
+    public void turnTowards(float delta, Vector2 vec) {
+        if (vec.len() <= 0) {
+            setVelocity(getVelocity());
+            return;
+        }
+        vec = clampAngle(vec, getVelocity(), delta * Constants.BOID_TURN_RATE);
+        setVelocity(vec);
     }
+
+    /**
+     * @param vec The vector to turn towards (MUST BE NORMALISED)
+     */
+    public void turnTowards(Vector2 vec) {
+        turnTowards(Gdx.graphics.getDeltaTime(), vec);
+    }
+
 
     @Override
     public void act(float delta) {
         super.act(delta);
-        Vector2 vel = this.body.getLinearVelocity();
+        Vector2 vel = new Vector2();
 
         // https://www.cs.toronto.edu/~dt/siggraph97-course/cwr87/
 
-        // region Velocity matching
+        // region Calculate velocity match AND flock centering forces
+        Vector2 flockAvgVel = new Vector2(this.body.getLinearVelocity());
+        Vector2 flockCenter = new Vector2(this.body.getPosition());
 
-        Vector2 avgVel = new Vector2(vel);
         for (Body body: boids) {
-            avgVel.add(body.getLinearVelocity());
+            flockAvgVel.add(body.getLinearVelocity());
+            flockCenter.add(body.getPosition());
         }
-        avgVel.x = avgVel.x / (boids.size() + 1);
-        avgVel.y = avgVel.y / (boids.size() + 1);
 
-        // Normalise and scale to velocity matching force
-        avgVel.nor().scl(Constants.VELOCITY_MATCH_FORCE);
+        flockAvgVel.scl(1f/(boids.size() + 1));
+        flockCenter.scl(1f/(boids.size() + 1));
+
+        // Calculate flock centering force (vector from current position to flock center)
+        Vector2 flockCenterForce = flockCenter.sub(this.body.getPosition());
+
+        // Normalise and scale both vectors to respective force scalars
+        flockAvgVel.nor().scl(Constants.VELOCITY_MATCH_FORCE);
+        flockCenterForce.nor().scl(Constants.FLOCK_CENTERING_FORCE);
 
         // endregion
 
-        // Set velocity
-        vel.set(avgVel).scl(Constants.BOID_VELOCITY);
-        this.body.setLinearVelocity(vel);
+        // Calculate desired velocity
+        vel.set(0, 0);
+        vel.add(flockCenterForce);
 
-        // Set rotation to align with velocity vector
-        setRotation(vel.angleDeg() - 90);
+        turnTowards(delta, vel);
     }
 
     /**

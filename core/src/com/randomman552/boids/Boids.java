@@ -2,6 +2,7 @@ package com.randomman552.boids;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -47,7 +48,7 @@ public class Boids extends ApplicationAdapter {
 
 		instance = this;
 	}
-	
+
 	@Override
 	public void create () {
 		// Create stage with static viewport size
