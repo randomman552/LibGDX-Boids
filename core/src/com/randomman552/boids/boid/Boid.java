@@ -124,6 +124,20 @@ public class Boid extends BodyLinkedActor {
         }
     }
 
+    private Body getClosestBoid() {
+        Body closest = null;
+        float closestDist = Float.MAX_VALUE;
+
+        for (Body boid: boids) {
+            float dist = boid.getPosition().sub(this.body.getPosition()).len();
+            if (dist < closestDist) {
+                closestDist = dist;
+                closest = boid;
+            }
+        }
+        return closest;
+    }
+
 
     private void addRayCastFixture(Fixture fixture) {
         rayCastFixtures.add(fixture);
@@ -220,6 +234,16 @@ public class Boid extends BodyLinkedActor {
 
         // https://www.cs.toronto.edu/~dt/siggraph97-course/cwr87/
 
+        // region Calculate separation force
+        Body closestBoid = getClosestBoid();
+        Vector2 sepForce = new Vector2();
+
+        if (closestBoid != null) {
+            sepForce.set(this.body.getPosition()).sub(closestBoid.getPosition());
+            sepForce.nor().scl(Constants.SEPARATION_FORCE);
+        }
+        // endregion
+
         // region Calculate velocity match AND flock centering forces
         Vector2 flockAvgVel = new Vector2(this.body.getLinearVelocity());
         Vector2 flockCenter = new Vector2(this.body.getPosition());
@@ -243,7 +267,7 @@ public class Boid extends BodyLinkedActor {
 
         // Calculate desired velocity
         vel.set(0, 0);
-        vel.add(flockCenterForce);
+        vel.add(sepForce);
 
         turnTowards(delta, vel);
     }
