@@ -232,7 +232,7 @@ public class Boid extends BodyLinkedActor {
         super.act(delta);
         Vector2 vel = new Vector2();
 
-        // https://www.cs.toronto.edu/~dt/siggraph97-course/cwr87/
+        // Based on: https://www.cs.toronto.edu/~dt/siggraph97-course/cwr87/
 
         // region Calculate separation force
         Body closestBoid = getClosestBoid();
@@ -244,30 +244,34 @@ public class Boid extends BodyLinkedActor {
         }
         // endregion
 
-        // region Calculate velocity match AND flock centering forces
-        Vector2 flockAvgVel = new Vector2(this.body.getLinearVelocity());
+        // region Calculate velocity match force
+        Vector2 velocityMatchForce = new Vector2(this.body.getLinearVelocity());
+
+        for (Body body: boids) {
+            velocityMatchForce.add(body.getLinearVelocity());
+        }
+
+        velocityMatchForce.scl(1f/(boids.size() + 1));
+        velocityMatchForce.nor().scl(Constants.VELOCITY_MATCH_FORCE);
+        // endregion
+
+        // region Calculate flock centering forces
         Vector2 flockCenter = new Vector2(this.body.getPosition());
 
         for (Body body: boids) {
-            flockAvgVel.add(body.getLinearVelocity());
             flockCenter.add(body.getPosition());
         }
 
-        flockAvgVel.scl(1f/(boids.size() + 1));
         flockCenter.scl(1f/(boids.size() + 1));
 
         // Calculate flock centering force (vector from current position to flock center)
-        Vector2 flockCenterForce = flockCenter.sub(this.body.getPosition());
-
-        // Normalise and scale both vectors to respective force scalars
-        flockAvgVel.nor().scl(Constants.VELOCITY_MATCH_FORCE);
-        flockCenterForce.nor().scl(Constants.FLOCK_CENTERING_FORCE);
-
+        Vector2 centerForce = flockCenter.sub(this.body.getPosition());
+        centerForce.nor().scl(Constants.FLOCK_CENTERING_FORCE);
         // endregion
 
         // Calculate desired velocity
-        vel.set(0, 0);
-        vel.add(sepForce);
+        vel.set(sepForce).add(velocityMatchForce).add(centerForce);
+        vel.nor().scl(Constants.BOID_VELOCITY);
 
         turnTowards(delta, vel);
     }

@@ -75,7 +75,7 @@ public class Boids extends ApplicationAdapter {
 		}
 
 		// Spawn boids at random points with random rotations
-		for (int i = 0; i < 500; i++) {
+		for (int i = 0; i < 100; i++) {
 			float x, y, rotation;
 			x = random.nextFloat() * vp.getWorldWidth();
 			y = random.nextFloat() * vp.getWorldHeight();
