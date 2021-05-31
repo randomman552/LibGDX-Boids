@@ -63,15 +63,20 @@ public class Boids extends ApplicationAdapter {
 		world.setContactListener(new BoidContactListener());
 		if (debug) {
 			stage.setDebugAll(true);
-			box2DDebugRenderer = new Box2DDebugRenderer(true, true, true, true, false, true);
+			box2DDebugRenderer = new Box2DDebugRenderer(true, true, true, true, true, true);
 		}
 
 		// Load assets
 		boidTexture = new TextureRegion(new Texture(Gdx.files.internal("boid.png")));
 
 		// Spawn the 4 walls of our map and place them correctly.
-		for (int i = 0; i < 4; i++) {
-			stage.addActor(new MapEdge(i));
+		MapEdge[] edges = new MapEdge[4];
+		for (int i = 0; i < edges.length; i++) {
+			edges[i] = new MapEdge(i);
+		}
+		for (int i = 0; i < edges.length; i++) {
+			edges[i].setPaired(edges[(i + 2) % edges.length]);
+			stage.addActor(edges[i]);
 		}
 
 		// Spawn boids at random points with random rotations
@@ -84,7 +89,6 @@ public class Boids extends ApplicationAdapter {
 			Boid boid = new Boid(x, y, rotation);
 			stage.addActor(boid);
 		}
-
 	}
 
 	@Override

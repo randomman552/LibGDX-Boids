@@ -1,7 +1,6 @@
 package com.randomman552.boids.boid;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Align;
@@ -11,7 +10,6 @@ import com.randomman552.boids.obstacles.Obstacle;
 import com.randomman552.boids.util.BodyLinkedActor;
 
 import java.util.ArrayList;
-import java.util.Vector;
 
 public class Boid extends BodyLinkedActor {
     private static class BoidRayCastCallback implements RayCastCallback {
@@ -68,23 +66,24 @@ public class Boid extends BodyLinkedActor {
 
         // region Create fixtures
 
-        FixtureDef fixtureDef = new FixtureDef();
         CircleShape circleShape = new CircleShape();
         PolygonShape polygonShape = new PolygonShape();
 
         // Primary sense circle
+        FixtureDef senseFixture = new FixtureDef();
         circleShape.setRadius(Constants.BOID_SENSE_RADIUS);
-        fixtureDef.shape = circleShape;
-        fixtureDef.isSensor = true;
-        fixtureDef.filter.groupIndex = Constants.BOID_SENSE_CATEGORY;
-        body.createFixture(fixtureDef);
+        senseFixture.shape = circleShape;
+        senseFixture.isSensor = true;
+        senseFixture.filter.groupIndex = Constants.BOID_SENSE_GROUP;
+        body.createFixture(senseFixture);
 
         // Central collision body
+        FixtureDef collisionFixture = new FixtureDef();
         polygonShape.setAsBox(getWidth()/2, getHeight()/2);
-        fixtureDef.shape = polygonShape;
-        fixtureDef.isSensor = true;
-        fixtureDef.filter.groupIndex = 0;
-        body.createFixture(fixtureDef);
+        collisionFixture.shape = polygonShape;
+        collisionFixture.isSensor = true;
+        collisionFixture.filter.groupIndex = Constants.BOID_COLLISION_GROUP;
+        body.createFixture(collisionFixture);
 
         // endregion
 
