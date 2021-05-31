@@ -19,9 +19,9 @@ public abstract class Constants {
 
     // Boid "desire" force scalars
     // Are used to scale behavior elements of boids (weighted avg)
-    public static float VELOCITY_MATCH_FORCE = 1f/3;
-    public static float FLOCK_CENTERING_FORCE = 1f/3;
-    public static float SEPARATION_FORCE = 1f/3;
+    public static float SEPARATION_FORCE = 0.4f;
+    public static float VELOCITY_MATCH_FORCE = 0.3f;
+    public static float FLOCK_CENTERING_FORCE = 0.3f;
 
 
     public static final Vector2 WORLD_SIZE = new Vector2(16, 9);
