@@ -17,9 +17,8 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.randomman552.boids.boid.Boid;
 import com.randomman552.boids.boid.BoidContactListener;
 import com.randomman552.boids.obstacles.MapEdge;
-import com.randomman552.boids.util.UIStage;
+import com.randomman552.boids.ui.UIStage;
 
-import java.util.Map;
 import java.util.Random;
 
 /**

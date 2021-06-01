@@ -63,7 +63,7 @@ public class Boid extends BodyLinkedActor {
 
         // Set initial velocity based on rotation
         Vector2 vel = body.getLinearVelocity();
-        vel.set(Constants.BOID_VELOCITY, 0);
+        vel.set(Constants.VELOCITY, 0);
         vel.rotateDeg(rotation);
         setVelocity(vel);
 
@@ -74,7 +74,7 @@ public class Boid extends BodyLinkedActor {
 
         // Primary sense circle
         FixtureDef senseFixture = new FixtureDef();
-        circleShape.setRadius(Constants.BOID_SENSE_RADIUS);
+        circleShape.setRadius(Constants.SENSE_RADIUS);
         senseFixture.shape = circleShape;
         senseFixture.isSensor = true;
         senseFixture.filter.groupIndex = Constants.BOID_SENSE_GROUP;
@@ -126,20 +126,6 @@ public class Boid extends BodyLinkedActor {
         }
     }
 
-    private Body getClosestBoid() {
-        Body closest = null;
-        float closestDist = Float.MAX_VALUE;
-
-        for (Body boid: boids) {
-            float dist = boid.getPosition().sub(this.body.getPosition()).len();
-            if (dist < closestDist) {
-                closestDist = dist;
-                closest = boid;
-            }
-        }
-        return closest;
-    }
-
 
     private void addRayCastFixture(Fixture fixture) {
         rayCastFixtures.add(fixture);
@@ -183,7 +169,7 @@ public class Boid extends BodyLinkedActor {
      * @return coordinates of point at the specified angle in front of the boid.
      */
     private Vector2 getSensePoint(float degrees) {
-        sensePoint.set(0, Constants.BOID_SENSE_RADIUS);
+        sensePoint.set(0, Constants.SENSE_RADIUS);
         sensePoint.rotateDeg(getRotation());
         sensePoint.rotateDeg(degrees);
         sensePoint.add(getCenterPoint());
@@ -213,8 +199,8 @@ public class Boid extends BodyLinkedActor {
             setVelocity(getVelocity());
             return;
         }
-        vec = clampAngle(vec, getVelocity(), delta * Constants.BOID_TURN_RATE);
-        vec.nor().scl(Constants.BOID_VELOCITY);
+        vec = clampAngle(vec, getVelocity(), delta * Constants.TURN_RATE);
+        vec.nor().scl(Constants.VELOCITY);
         setVelocity(vec);
     }
 
@@ -247,7 +233,7 @@ public class Boid extends BodyLinkedActor {
                 float forceScalar = (toBoid.len() < 0.5f) ? sepForceAtMin : sepForceAtMin / (toBoid.len() / minSepDist);
                 if (Constants.DRAW_SEPARATION_FORCE) {
                     Color lineColor = Constants.COLOR_SEPARATION_FORCE;
-                    lineColor.a = (forceScalar / sepForceAtMin) * Constants.SEPARATION_FORCE;
+                    lineColor.a = (forceScalar / sepForceAtMin) * Constants.SEPARATION_FORCE_SCALAR;
                     Boids.getInstance().shapeRenderer.setColor(lineColor);
                     Boids.getInstance().shapeRenderer.line(this.body.getPosition(), boid.getPosition());
                 }
@@ -255,7 +241,7 @@ public class Boid extends BodyLinkedActor {
                 sepForce.add(toBoid);
             }
         }
-        sepForce.scl(-Constants.SEPARATION_FORCE);
+        sepForce.scl(-Constants.SEPARATION_FORCE_SCALAR);
         // endregion
 
         // region Calculate velocity match force
@@ -266,7 +252,7 @@ public class Boid extends BodyLinkedActor {
         }
 
         velocityMatchForce.scl(1f/(boids.size() + 1));
-        velocityMatchForce.nor().scl(Constants.VELOCITY_MATCH_FORCE);
+        velocityMatchForce.nor().scl(Constants.VELOCITY_MATCH_FORCE_SCALAR);
 
         if (Constants.DRAW_VELOCITY_MATCH_FORCE) {
             Vector2 temp = new Vector2(velocityMatchForce);
@@ -286,7 +272,7 @@ public class Boid extends BodyLinkedActor {
 
         // Calculate flock centering force (vector from current position to flock center)
         Vector2 centerForce = flockCenter.sub(this.body.getPosition());
-        centerForce.nor().scl(Constants.FLOCK_CENTERING_FORCE);
+        centerForce.nor().scl(Constants.FLOCK_CENTER_FORCE_SCALAR);
 
         // Draw the force if required
         if (Constants.DRAW_FLOCK_CENTERING_FORCE) {
@@ -299,7 +285,7 @@ public class Boid extends BodyLinkedActor {
         // Calculate desired velocity
         Vector2 vel = new Vector2();
         vel.set(sepForce).add(velocityMatchForce).add(centerForce);
-        vel.nor().scl(Constants.BOID_VELOCITY);
+        vel.nor().scl(Constants.VELOCITY);
 
         turnTowards(delta, vel);
     }
