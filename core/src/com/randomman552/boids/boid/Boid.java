@@ -247,7 +247,7 @@ public class Boid extends BodyLinkedActor {
                 float forceScalar = (toBoid.len() < 0.5f) ? sepForceAtMin : sepForceAtMin / (toBoid.len() / minSepDist);
                 if (Constants.DRAW_SEPARATION_FORCE) {
                     Color lineColor = Constants.COLOR_SEPARATION_FORCE;
-                    lineColor.a = forceScalar / sepForceAtMin;
+                    lineColor.a = (forceScalar / sepForceAtMin) * Constants.SEPARATION_FORCE;
                     Boids.getInstance().shapeRenderer.setColor(lineColor);
                     Boids.getInstance().shapeRenderer.line(this.body.getPosition(), boid.getPosition());
                 }
