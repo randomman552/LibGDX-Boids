@@ -2,6 +2,7 @@ package com.randomman552.boids;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -17,6 +18,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.randomman552.boids.boid.Boid;
 import com.randomman552.boids.boid.BoidContactListener;
 import com.randomman552.boids.obstacles.MapEdge;
+import com.randomman552.boids.util.UIStage;
 
 import java.util.Map;
 import java.util.Random;
@@ -31,6 +33,8 @@ public class Boids extends ApplicationAdapter {
 	}
 
 	private Stage stage;
+	private UIStage uiStage;
+	private InputMultiplexer inputMultiplexer;
 	private Box2DDebugRenderer box2DDebugRenderer;
 	private final Random random;
 	private final boolean debug;
@@ -53,14 +57,24 @@ public class Boids extends ApplicationAdapter {
 
 	@Override
 	public void create () {
-		// Create stage with static viewport size
+		// Load assets
+		boidTexture = new TextureRegion(new Texture(Gdx.files.internal("boid.png")));
+		skin = new Skin(Gdx.files.internal("uiskin.json"));
+
+		// Create stage with static viewport size for boid world
 		Viewport vp = new StretchViewport(Constants.WORLD_SIZE.x, Constants.WORLD_SIZE.y);
 		stage = new Stage(vp);
+		uiStage = new UIStage();
+
+		// Multiplex input processors
+		inputMultiplexer = new InputMultiplexer();
+		inputMultiplexer.addProcessor(uiStage);
+		inputMultiplexer.addProcessor(stage);
+		Gdx.input.setInputProcessor(inputMultiplexer);
+
 		shapeRenderer = new ShapeRenderer();
 		shapeRenderer.setColor(0, 0, 1, 1);
 		shapeRenderer.setAutoShapeType(true);
-
-		skin = new Skin(Gdx.files.internal("uiskin.json"));
 
 		// Start Box2D physics
 		world = new World(new Vector2(0, 0), true);
@@ -69,9 +83,6 @@ public class Boids extends ApplicationAdapter {
 			stage.setDebugAll(true);
 			box2DDebugRenderer = new Box2DDebugRenderer(true, true, true, true, true, true);
 		}
-
-		// Load assets
-		boidTexture = new TextureRegion(new Texture(Gdx.files.internal("boid.png")));
 
 		// Spawn the 4 walls of our map and place them correctly.
 		MapEdge[] edges = new MapEdge[4];
@@ -107,6 +118,7 @@ public class Boids extends ApplicationAdapter {
 		stage.draw();
 		if (debug) box2DDebugRenderer.render(world, stage.getCamera().combined);
 
+		uiStage.draw();
 		world.step(Gdx.graphics.getDeltaTime(), 6, 2);
 	}
 	
@@ -114,5 +126,12 @@ public class Boids extends ApplicationAdapter {
 	public void dispose () {
 		stage.dispose();
 		instance = null;
+	}
+
+	@Override
+	public void resize(int width, int height) {
+		super.resize(width, height);
+		stage.getViewport().update(width, height);
+		uiStage.resize(width, height);
 	}
 }
