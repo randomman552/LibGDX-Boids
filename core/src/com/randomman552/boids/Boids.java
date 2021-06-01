@@ -37,19 +37,16 @@ public class Boids extends ApplicationAdapter {
 	private InputMultiplexer inputMultiplexer;
 	private Box2DDebugRenderer box2DDebugRenderer;
 	private final Random random;
-	private final boolean debug;
 
 	public World world;
 	public ShapeRenderer shapeRenderer;
 	public TextureRegion boidTexture;
 	public Skin skin;
 
-	public Boids(boolean debug) {
+	public Boids() {
 		if (instance != null) {
 			throw new RuntimeException("Attempt to instantiate multiple of singleton Boids class!");
 		}
-
-		this.debug = debug;
 		this.random = new Random();
 
 		instance = this;
@@ -79,10 +76,7 @@ public class Boids extends ApplicationAdapter {
 		// Start Box2D physics
 		world = new World(new Vector2(0, 0), true);
 		world.setContactListener(new BoidContactListener());
-		if (debug) {
-			stage.setDebugAll(true);
-			box2DDebugRenderer = new Box2DDebugRenderer(true, true, true, true, true, true);
-		}
+		box2DDebugRenderer = new Box2DDebugRenderer(false, false, false, false, false, false);
 
 		// Spawn the 4 walls of our map and place them correctly.
 		MapEdge[] edges = new MapEdge[4];
@@ -116,9 +110,9 @@ public class Boids extends ApplicationAdapter {
 		shapeRenderer.end();
 
 		stage.draw();
-		if (debug) box2DDebugRenderer.render(world, stage.getCamera().combined);
-
+		box2DDebugRenderer.render(world, stage.getCamera().combined);
 		uiStage.draw();
+
 		world.step(Gdx.graphics.getDeltaTime(), 6, 2);
 	}
 	

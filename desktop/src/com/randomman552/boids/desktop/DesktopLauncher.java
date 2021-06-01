@@ -7,6 +7,6 @@ import com.randomman552.boids.Boids;
 public class DesktopLauncher {
 	public static void main (String[] arg) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-		new LwjglApplication(new Boids(arg.length > 0 && arg[0].equals("debug")), config);
+		new LwjglApplication(new Boids(), config);
 	}
 }
