@@ -1,5 +1,6 @@
 package com.randomman552.boids.util;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
@@ -49,6 +50,7 @@ public class BodyLinkedActor extends Actor implements Disposable {
     @Override
     public void draw(Batch batch, float parentAlpha) {
         if (getFrame() == null) return;
+        batch.setColor(getColor());
         batch.draw(getFrame(),
                 getX(), getY(),
                 getOriginX(), getOriginY(),
@@ -56,6 +58,7 @@ public class BodyLinkedActor extends Actor implements Disposable {
                 getScaleX(), getScaleY(),
                 getRotation()
         );
+        batch.setColor(1, 1, 1, 1);
     }
 
     @Override

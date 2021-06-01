@@ -104,7 +104,7 @@ public class Boids extends ApplicationAdapter {
 
 	@Override
 	public void render () {
-		ScreenUtils.clear(0, 0, 0, 1);
+		ScreenUtils.clear(Constants.BACKGROUND_COLOR);
 		Gdx.gl.glEnable(GL20.GL_BLEND);
 
 		shapeRenderer.setProjectionMatrix(stage.getBatch().getProjectionMatrix());

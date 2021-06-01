@@ -14,6 +14,8 @@ public abstract class Constants {
     public static final int BOID_TURN_RATE = 240;
     public static final float MIN_SEPARATION_DIST = 0.25f;
     public static final float SEPARATION_FORCE_AT_MIN_DIST = 2;
+    public static final Color BOID_COLOR = new Color(1, 1, 1, 1);
+    public static final Color BACKGROUND_COLOR = new Color(0, 0, 0, 1);
 
     // Sense groups to control collisions
     public static final short BOID_SENSE_GROUP = -1;
@@ -30,9 +32,9 @@ public abstract class Constants {
     public static boolean DRAW_SEPARATION_FORCE = false;
     public static boolean DRAW_VELOCITY_MATCH_FORCE = false;
     public static boolean DRAW_FLOCK_CENTERING_FORCE = false;
-    public static Color COLOR_SEPARATION_FORCE = new Color(0, 1, 0, 1);
-    public static Color COLOR_VELOCITY_MATCH_FORCE = new Color(1, 0, 0, 1);
-    public static Color COLOR_FLOCK_CENTERING_FORCE = new Color(0, 0, 1, 1);
+    public static final Color COLOR_SEPARATION_FORCE = new Color(0, 1, 0, 1);
+    public static final Color COLOR_VELOCITY_MATCH_FORCE = new Color(1, 0, 0, 1);
+    public static final Color COLOR_FLOCK_CENTERING_FORCE = new Color(0, 0, 1, 1);
 
 
     public static final Vector2 WORLD_SIZE = new Vector2(16, 9);

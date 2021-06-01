@@ -2,6 +2,7 @@ package com.randomman552.boids.util;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -21,8 +22,36 @@ import com.randomman552.boids.Constants;
  * Class defining all on screen ui elements for controlling boids.
  */
 public class UIStage extends Stage {
-    TextButton openButton;
-    Table table;
+    /**
+     * Change listener that is used to update an instance of Color depending on the positions of passed sliders.
+     */
+    private static class ColorUpdateListener extends ChangeListener {
+        private final Color color;
+        private final Slider rSlider, gSlider, bSlider, aSlider;
+
+        public ColorUpdateListener(Color color, Slider rSlider, Slider gSlider, Slider bSlider, Slider aSlider) {
+            this.color = color;
+            this.rSlider = rSlider;
+            this.gSlider = gSlider;
+            this.bSlider = bSlider;
+            this.aSlider = aSlider;
+        }
+
+        public ColorUpdateListener(Color color, Slider rSlider, Slider gSlider, Slider bSlider) {
+            this(color, rSlider, gSlider, bSlider, null);
+        }
+
+        @Override
+        public void changed(ChangeEvent event, Actor actor) {
+            if (aSlider != null)
+                color.set(rSlider.getValue(), gSlider.getValue(), bSlider.getValue(), aSlider.getValue());
+            else
+                color.set(rSlider.getValue(), gSlider.getValue(), bSlider.getValue(), color.a);
+        }
+    }
+
+    protected final TextButton openButton;
+    protected final Table table;
 
     public UIStage() {
         super();
@@ -52,8 +81,12 @@ public class UIStage extends Stage {
         float tableHeight = 0;
 
         // region Force sliders
+        Label forceSliderLabel = new Label("Boid force scalars", skin);
+        Label sepForceSliderLabel = new Label("Separation:", skin);
         Slider sepForceSlider = new Slider(0, 1, 0.01f,false, skin);
+        Label velMatchForceSliderLabel = new Label("Velocity matching:", skin);
         Slider velMatchForceSlider = new Slider(0, 1, 0.01f,false, skin);
+        Label flockCenterForceSliderLabel = new Label("Flock centering:", skin);
         Slider flockCenterForceSlider = new Slider(0, 1, 0.01f,false, skin);
 
         sepForceSlider.setValue(Constants.SEPARATION_FORCE);
@@ -90,12 +123,11 @@ public class UIStage extends Stage {
         });
         // endregion
 
-        Label sepForceSliderLabel = new Label("Separation:", skin);
-        Label velMatchForceSliderLabel = new Label("Velocity matching:", skin);
-        Label flockCenterForceSliderLabel = new Label("Flock centering:", skin);
+        tableHeight += Math.max(sepForceSlider.getHeight(), sepForceSliderLabel.getHeight()) * 4;
 
-        tableHeight += Math.max(sepForceSlider.getHeight(), sepForceSliderLabel.getHeight()) * 3;
-
+        table.row();
+        table.add(forceSliderLabel).colspan(2);
+        table.row();
         table.add(sepForceSliderLabel, sepForceSlider);
         table.row();
         table.add(velMatchForceSliderLabel, velMatchForceSlider);
@@ -157,6 +189,87 @@ public class UIStage extends Stage {
         table.add(drawVelMatchForceCheckbox).colspan(2).align(Align.left);
         table.row();
         table.add(drawCenteringForceCheckbox).colspan(2).align(Align.left);
+        // endregion
+
+        // region Boid color options
+        Label boidColors = new Label("Boid Colors", skin);
+        Label boidColorRedLabel = new Label("Red:", skin);
+        Slider boidColorRedSlider = new Slider(0, 1, 0.01f,false, skin);
+        Label boidColorGreenLabel = new Label("Green:", skin);
+        Slider boidColorGreenSlider = new Slider(0, 1, 0.01f,false, skin);
+        Label boidColorBlueLabel = new Label("Blue:", skin);
+        Slider boidColorBlueSlider = new Slider(0, 1, 0.01f,false, skin);
+        Label boidColorAlphaLabel = new Label("Alpha:", skin);
+        Slider boidColorAlphaSlider = new Slider(0, 1, 0.01f,false, skin);
+
+        boidColorRedSlider.setValue(Constants.BOID_COLOR.r);
+        boidColorGreenSlider.setValue(Constants.BOID_COLOR.g);
+        boidColorBlueSlider.setValue(Constants.BOID_COLOR.b);
+        boidColorAlphaSlider.setValue(Constants.BOID_COLOR.a);
+
+        // region Input listeners
+        ColorUpdateListener boidColorUpdateListener = new ColorUpdateListener(
+                Constants.BOID_COLOR,
+                boidColorRedSlider,
+                boidColorGreenSlider,
+                boidColorBlueSlider,
+                boidColorAlphaSlider
+        );
+        boidColorRedSlider.addListener(boidColorUpdateListener);
+        boidColorGreenSlider.addListener(boidColorUpdateListener);
+        boidColorBlueSlider.addListener(boidColorUpdateListener);
+        boidColorAlphaSlider.addListener(boidColorUpdateListener);
+        // endregion
+
+        tableHeight += 5 * Math.max(boidColorBlueLabel.getHeight(), boidColorBlueSlider.getHeight());
+
+        table.row();
+        table.add(boidColors).colspan(2).align(Align.center);
+        table.row();
+        table.add(boidColorRedLabel, boidColorRedSlider);
+        table.row();
+        table.add(boidColorGreenLabel, boidColorGreenSlider);
+        table.row();
+        table.add(boidColorBlueLabel, boidColorBlueSlider);
+        table.row();
+        table.add(boidColorAlphaLabel, boidColorAlphaSlider);
+        // endregion
+
+        // region Background color options
+        Label backgroundColorsLabel = new Label("Background colors", skin);
+        Label backgroundColorsRedLabel = new Label("Red", skin);
+        Slider backgroundColorsRedSlider = new Slider(0, 1, 0.01f,false, skin);
+        Label backgroundColorsGreenLabel = new Label("Green", skin);
+        Slider backgroundColorsGreenSlider = new Slider(0, 1, 0.01f,false, skin);
+        Label backgroundColorsBlueLabel = new Label("Blue", skin);
+        Slider backgroundColorsBlueSlider = new Slider(0, 1, 0.01f,false, skin);
+
+        backgroundColorsRedSlider.setValue(Constants.BACKGROUND_COLOR.r);
+        backgroundColorsGreenSlider.setValue(Constants.BACKGROUND_COLOR.g);
+        backgroundColorsBlueSlider.setValue(Constants.BACKGROUND_COLOR.b);
+
+        // region Input listeners
+        ColorUpdateListener backgroundColorUpdateListener = new ColorUpdateListener(
+                Constants.BACKGROUND_COLOR,
+                backgroundColorsRedSlider,
+                backgroundColorsGreenSlider,
+                backgroundColorsBlueSlider
+        );
+        backgroundColorsRedSlider.addListener(backgroundColorUpdateListener);
+        backgroundColorsGreenSlider.addListener(backgroundColorUpdateListener);
+        backgroundColorsBlueSlider.addListener(backgroundColorUpdateListener);
+        // endregion
+
+        tableHeight += 4 * Math.max(boidColorBlueLabel.getHeight(), boidColorBlueSlider.getHeight());
+
+        table.row();
+        table.add(backgroundColorsLabel).colspan(2).align(Align.center);
+        table.row();
+        table.add(backgroundColorsRedLabel, backgroundColorsRedSlider);
+        table.row();
+        table.add(backgroundColorsGreenLabel, backgroundColorsGreenSlider);
+        table.row();
+        table.add(backgroundColorsBlueLabel, backgroundColorsBlueSlider);
         // endregion
 
         table.setWidth(300);
