@@ -77,7 +77,8 @@ public class MapEdge extends Obstacle {
     public void teleportToPaired(Body body) {
         if (!onCoolDown(body)) {
             toTeleport.add(body);
-            coolDowns.put(body, 0.5f);
+            // Put on cool down for 10 frames
+            coolDowns.put(body, (1f/60f) * 10f);
         }
     }
 
