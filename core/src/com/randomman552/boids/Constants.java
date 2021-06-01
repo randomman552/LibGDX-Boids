@@ -1,5 +1,6 @@
 package com.randomman552.boids;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 
 public abstract class Constants {
@@ -22,6 +23,14 @@ public abstract class Constants {
     public static float SEPARATION_FORCE = 1f;
     public static float VELOCITY_MATCH_FORCE = 1f;
     public static float FLOCK_CENTERING_FORCE = 1f;
+
+    // Debug drawing variables
+    public static boolean DRAW_SEPARATION_FORCE = false;
+    public static boolean DRAW_VELOCITY_MATCH_FORCE = false;
+    public static boolean DRAW_FLOCK_CENTERING_FORCE = false;
+    public static Color COLOR_SEPARATION_FORCE = new Color(0, 1, 0, 1);
+    public static Color COLOR_VELOCITY_MATCH_FORCE = new Color(1, 0, 0, 1);
+    public static Color COLOR_FLOCK_CENTERING_FORCE = new Color(0, 0, 1, 1);
 
 
     public static final Vector2 WORLD_SIZE = new Vector2(16, 9);

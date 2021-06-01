@@ -3,11 +3,13 @@ package com.randomman552.boids.util;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -29,7 +31,7 @@ public class UIStage extends Stage {
 
         Skin skin = Boids.getInstance().skin;
 
-        openButton = new TextButton("Open params", skin);
+        openButton = new TextButton("Open options", skin);
         openButton.setWidth(300);
         openButton.addListener(new InputListener() {
             @Override
@@ -40,7 +42,7 @@ public class UIStage extends Stage {
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
                 table.setVisible(!table.isVisible());
-                openButton.setText((table.isVisible()) ? "Close params": "Open params");
+                openButton.setText((table.isVisible()) ? "Close options": "Open options");
             }
         });
         addActor(openButton);
@@ -99,6 +101,62 @@ public class UIStage extends Stage {
         table.add(velMatchForceSliderLabel, velMatchForceSlider);
         table.row();
         table.add(flockCenterForceSliderLabel, flockCenterForceSlider);
+        // endregion
+
+        // region Debug draw options
+        Label debugHeaderLabel = new Label("Debug draw options:", skin);
+        CheckBox drawPhysicsDebugCheckbox = new CheckBox("Draw physics", skin);
+        // Force drawing checkboxes
+        CheckBox drawSeparationForceCheckbox = new CheckBox("Draw separation force", skin);
+        CheckBox drawVelMatchForceCheckbox = new CheckBox("Draw velocity match force", skin);
+        CheckBox drawCenteringForceCheckbox = new CheckBox("Draw flock centering force", skin);
+
+        tableHeight += debugHeaderLabel.getHeight() + drawPhysicsDebugCheckbox.getHeight() * 4;
+
+        // region Add input listeners
+        drawPhysicsDebugCheckbox.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                CheckBox checkBox = ((CheckBox) actor);
+                Box2DDebugRenderer debugRenderer = Boids.getInstance().box2DDebugRenderer;
+                debugRenderer.setDrawVelocities(checkBox.isChecked());
+                debugRenderer.setDrawBodies(checkBox.isChecked());
+            }
+        });
+        drawSeparationForceCheckbox.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                CheckBox checkBox = ((CheckBox) actor);
+                Constants.DRAW_SEPARATION_FORCE = checkBox.isChecked();
+            }
+        });
+        drawVelMatchForceCheckbox.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                CheckBox checkBox = ((CheckBox) actor);
+                Constants.DRAW_VELOCITY_MATCH_FORCE = checkBox.isChecked();
+            }
+        });
+        drawCenteringForceCheckbox.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                CheckBox checkBox = ((CheckBox) actor);
+                Constants.DRAW_FLOCK_CENTERING_FORCE = checkBox.isChecked();
+            }
+        });
+        // endregion
+
+        table.row();
+        table.add(debugHeaderLabel).colspan(2);
+
+        table.row();
+        table.add(drawPhysicsDebugCheckbox).colspan(2).align(Align.left);
+        table.row();
+        table.add(drawSeparationForceCheckbox).colspan(2).align(Align.left);
+        table.row();
+        table.add(drawVelMatchForceCheckbox).colspan(2).align(Align.left);
+        table.row();
+        table.add(drawCenteringForceCheckbox).colspan(2).align(Align.left);
         // endregion
 
         table.setWidth(300);

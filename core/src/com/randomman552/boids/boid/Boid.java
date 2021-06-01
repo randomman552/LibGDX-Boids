@@ -229,7 +229,6 @@ public class Boid extends BodyLinkedActor {
     @Override
     public void act(float delta) {
         super.act(delta);
-        Vector2 vel = new Vector2();
 
         // Based on: https://www.cs.toronto.edu/~dt/siggraph97-course/cwr87/
 
@@ -238,6 +237,10 @@ public class Boid extends BodyLinkedActor {
         Vector2 sepForce = new Vector2();
 
         if (closestBoid != null) {
+            if (Constants.DRAW_SEPARATION_FORCE) {
+                Boids.getInstance().shapeRenderer.setColor(Constants.COLOR_SEPARATION_FORCE);
+                Boids.getInstance().shapeRenderer.line(this.body.getPosition(), closestBoid.getPosition());
+            }
             sepForce.set(this.body.getPosition()).sub(closestBoid.getPosition());
             sepForce.nor().scl(Constants.SEPARATION_FORCE);
         }
@@ -252,6 +255,12 @@ public class Boid extends BodyLinkedActor {
 
         velocityMatchForce.scl(1f/(boids.size() + 1));
         velocityMatchForce.nor().scl(Constants.VELOCITY_MATCH_FORCE);
+
+        if (Constants.DRAW_VELOCITY_MATCH_FORCE) {
+            Vector2 temp = new Vector2(velocityMatchForce);
+            Boids.getInstance().shapeRenderer.setColor(Constants.COLOR_VELOCITY_MATCH_FORCE);
+            Boids.getInstance().shapeRenderer.line(this.body.getPosition(), temp.add(this.body.getPosition()));
+        }
         // endregion
 
         // region Calculate flock centering forces
@@ -266,9 +275,17 @@ public class Boid extends BodyLinkedActor {
         // Calculate flock centering force (vector from current position to flock center)
         Vector2 centerForce = flockCenter.sub(this.body.getPosition());
         centerForce.nor().scl(Constants.FLOCK_CENTERING_FORCE);
+
+        // Draw the force if required
+        if (Constants.DRAW_FLOCK_CENTERING_FORCE) {
+            Vector2 temp = new Vector2(centerForce);
+            Boids.getInstance().shapeRenderer.setColor(Constants.COLOR_FLOCK_CENTERING_FORCE);
+            Boids.getInstance().shapeRenderer.line(this.body.getPosition(), temp.add(this.body.getPosition()));
+        }
         // endregion
 
         // Calculate desired velocity
+        Vector2 vel = new Vector2();
         vel.set(sepForce).add(velocityMatchForce).add(centerForce);
         vel.nor().scl(Constants.BOID_VELOCITY);
 

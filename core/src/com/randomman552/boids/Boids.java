@@ -35,9 +35,9 @@ public class Boids extends ApplicationAdapter {
 	private Stage stage;
 	private UIStage uiStage;
 	private InputMultiplexer inputMultiplexer;
-	private Box2DDebugRenderer box2DDebugRenderer;
-	private final Random random;
 
+	public final Random random;
+	public Box2DDebugRenderer box2DDebugRenderer;
 	public World world;
 	public ShapeRenderer shapeRenderer;
 	public TextureRegion boidTexture;
@@ -77,6 +77,7 @@ public class Boids extends ApplicationAdapter {
 		world = new World(new Vector2(0, 0), true);
 		world.setContactListener(new BoidContactListener());
 		box2DDebugRenderer = new Box2DDebugRenderer(false, false, false, false, false, false);
+		box2DDebugRenderer.VELOCITY_COLOR.set(1, 1, 0, 1);
 
 		// Spawn the 4 walls of our map and place them correctly.
 		MapEdge[] edges = new MapEdge[4];
