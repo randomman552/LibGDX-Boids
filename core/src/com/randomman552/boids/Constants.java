@@ -12,6 +12,8 @@ public abstract class Constants {
      * In degrees per second
      */
     public static final int BOID_TURN_RATE = 240;
+    public static final float MIN_SEPARATION_DIST = 0.25f;
+    public static final float SEPARATION_FORCE_AT_MIN_DIST = 2;
 
     // Sense groups to control collisions
     public static final short BOID_SENSE_GROUP = -1;

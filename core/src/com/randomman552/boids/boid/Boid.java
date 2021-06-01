@@ -1,6 +1,7 @@
 package com.randomman552.boids.boid;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Align;
@@ -205,22 +206,16 @@ public class Boid extends BodyLinkedActor {
         return vec;
     }
 
-    /**
-     * @param delta Time between this frame and the last.
-     * @param vec The vector to turn towards (MUST BE NORMALISED)
-     */
     public void turnTowards(float delta, Vector2 vec) {
         if (vec.len() <= 0) {
             setVelocity(getVelocity());
             return;
         }
         vec = clampAngle(vec, getVelocity(), delta * Constants.BOID_TURN_RATE);
+        vec.nor().scl(Constants.BOID_VELOCITY);
         setVelocity(vec);
     }
 
-    /**
-     * @param vec The vector to turn towards (MUST BE NORMALISED)
-     */
     public void turnTowards(Vector2 vec) {
         turnTowards(Gdx.graphics.getDeltaTime(), vec);
     }
@@ -233,17 +228,26 @@ public class Boid extends BodyLinkedActor {
         // Based on: https://www.cs.toronto.edu/~dt/siggraph97-course/cwr87/
 
         // region Calculate separation force
-        Body closestBoid = getClosestBoid();
         Vector2 sepForce = new Vector2();
+        Vector2 toBoid = new Vector2();
+        float sepForceAtMin = Constants.SEPARATION_FORCE_AT_MIN_DIST;
+        float minSepDist = Constants.MIN_SEPARATION_DIST;
 
-        if (closestBoid != null) {
-            if (Constants.DRAW_SEPARATION_FORCE) {
-                Boids.getInstance().shapeRenderer.setColor(Constants.COLOR_SEPARATION_FORCE);
-                Boids.getInstance().shapeRenderer.line(this.body.getPosition(), closestBoid.getPosition());
+        for (Body boid: boids) {
+            toBoid.set(boid.getPosition()).sub(this.body.getPosition());
+            if (toBoid.len() != 0) {
+                float forceScalar = (toBoid.len() < 0.5f) ? sepForceAtMin : sepForceAtMin / (toBoid.len() / minSepDist);
+                if (Constants.DRAW_SEPARATION_FORCE) {
+                    Color lineColor = Constants.COLOR_SEPARATION_FORCE;
+                    lineColor.a = forceScalar / sepForceAtMin;
+                    Boids.getInstance().shapeRenderer.setColor(lineColor);
+                    Boids.getInstance().shapeRenderer.line(this.body.getPosition(), boid.getPosition());
+                }
+                toBoid.scl(forceScalar);
+                sepForce.add(toBoid);
             }
-            sepForce.set(this.body.getPosition()).sub(closestBoid.getPosition());
-            sepForce.nor().scl(Constants.SEPARATION_FORCE);
         }
+        sepForce.scl(-Constants.SEPARATION_FORCE);
         // endregion
 
         // region Calculate velocity match force
