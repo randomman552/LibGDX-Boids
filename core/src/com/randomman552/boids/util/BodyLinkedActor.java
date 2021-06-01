@@ -1,6 +1,7 @@
 package com.randomman552.boids.util;
 
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -9,6 +10,10 @@ import com.randomman552.boids.Boids;
 
 public class BodyLinkedActor extends Actor implements Disposable {
     protected Body body;
+
+    protected TextureRegion getFrame() {
+        return null;
+    }
 
     @Override
     public void act(float delta) {
@@ -43,7 +48,8 @@ public class BodyLinkedActor extends Actor implements Disposable {
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        batch.draw(Boids.getInstance().boidTexture,
+        if (getFrame() == null) return;
+        batch.draw(getFrame(),
                 getX(), getY(),
                 getOriginX(), getOriginY(),
                 getWidth(), getHeight(),

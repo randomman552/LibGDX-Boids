@@ -2,6 +2,7 @@ package com.randomman552.boids.boid;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Align;
@@ -222,8 +223,15 @@ public class Boid extends BodyLinkedActor {
 
 
     @Override
+    protected TextureRegion getFrame() {
+        return Boids.getInstance().boidTexture;
+    }
+
+    @Override
     public void act(float delta) {
         super.act(delta);
+        if(this.body.getPosition().x > Constants.WORLD_SIZE.x || this.body.getPosition().y > Constants.WORLD_SIZE.y)
+            System.out.println("FUCK");
 
         // Based on: https://www.cs.toronto.edu/~dt/siggraph97-course/cwr87/
 

@@ -3,9 +3,7 @@ package com.randomman552.boids;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
@@ -42,6 +40,7 @@ public class Boids extends ApplicationAdapter {
 	public World world;
 	public ShapeRenderer shapeRenderer;
 	public TextureRegion boidTexture;
+	public TextureRegion obstacleTexture;
 	public Skin skin;
 
 	public Boids() {
@@ -57,6 +56,7 @@ public class Boids extends ApplicationAdapter {
 	public void create () {
 		// Load assets
 		boidTexture = new TextureRegion(new Texture(Gdx.files.internal("boid.png")));
+		obstacleTexture = new TextureRegion(new Texture(Gdx.files.internal("obstacle.png")));
 		skin = new Skin(Gdx.files.internal("uiskin.json"));
 
 		// Create stage with static viewport size for boid world

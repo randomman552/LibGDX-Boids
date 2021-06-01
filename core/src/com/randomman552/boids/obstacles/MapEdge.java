@@ -29,19 +29,19 @@ public class MapEdge extends Obstacle {
         switch (index) {
             case 0:
                 setOrigin(Align.topRight);
-                setPosition(0, Constants.WORLD_SIZE.y + 0.5f);
+                setPosition(0, Constants.WORLD_SIZE.y);
                 break;
             case 1:
                 setOrigin(Align.topRight);
-                setPosition(Constants.WORLD_SIZE.x + 0.5f, 0);
+                setPosition(Constants.WORLD_SIZE.x, 0);
                 break;
             case 2:
                 setOrigin(Align.bottomLeft);
-                setPosition(0, -1.5f);
+                setPosition(0, -1);
                 break;
             case 3:
                 setOrigin(Align.bottomLeft);
-                setPosition(-1.5f, 0);
+                setPosition(-1, 0);
                 break;
         }
     }
