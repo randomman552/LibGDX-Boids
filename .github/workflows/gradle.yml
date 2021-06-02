@@ -29,6 +29,9 @@ jobs:
     - name: Build jar archive with Gradle
       run: ./gradlew desktop:dist
 
+    - name: Rename Jar archive
+      run: mv desktop/build/libs/desktop-1.0.jar ./Boids.jar
+
     - name: Automatic Releases
       uses: marvinpinto/action-automatic-releases@v1.1.2
       with:
@@ -37,4 +40,4 @@ jobs:
         automatic_release_tag: "latest"
         title: "Latest Build"
         files: |
-          desktop/build/libs/desktop-1.0.jar
+          Boids.jar
