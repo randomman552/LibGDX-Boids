@@ -8,7 +8,7 @@ The rules that define boids are given by a report he references,
 which can be found [here](https://www.cs.toronto.edu/~dt/siggraph97-course/cwr87/).
 
 ## What is a boid?
-A boid is an algorithmic approach to simulation of flocking behaviour such as that found in birds or schools of fish.
+Boids are an algorithmic approach to simulation of flocking behaviour such as that found in flocks of birds or schools of fish.
 
 They achieve this by following a series of simple rules which are defined in the report above 
 and are as follows:
@@ -19,8 +19,8 @@ and are as follows:
 These are in order of decreasing presidence, 
 meaning that Collision Avoidance is the most important, and Flock Centering is the least important.
 
-Currently, this implementation does not model avoidance of other obstacles such as walls 
-(boids are simply teleported when a wall is hit), but I would like to add collision avoidance later.
+Currently, this implementation handles avoidance of collisions with other objects, this is carried out by performing 
+ray casts at increasing angles until an escape route can be found. The boid then turns towards this escape vector.
 
 ## Spatial partitioning
 In an attempt to improve performance of this boid implementation, we make use of spatial partitioning

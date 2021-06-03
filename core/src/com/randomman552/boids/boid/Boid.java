@@ -8,7 +8,6 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Align;
 import com.randomman552.boids.Boids;
 import com.randomman552.boids.Constants;
-import com.randomman552.boids.obstacles.Obstacle;
 import com.randomman552.boids.util.BodyLinkedActor;
 
 import java.util.ArrayList;
@@ -16,6 +15,7 @@ import java.util.ArrayList;
 public class Boid extends BodyLinkedActor {
     private static class BoidRayCastCallback implements RayCastCallback {
         private final Boid boid;
+        private final ArrayList<Fixture> fixtures = new ArrayList<>();
 
         public BoidRayCastCallback(Boid boid) {
             this.boid = boid;
@@ -27,15 +27,27 @@ public class Boid extends BodyLinkedActor {
             if (fixture.isSensor())
                 return -1;
 
-            boid.addRayCastFixture(fixture);
+            // Ignore any fixtures with same group as boid sense radius
+            if (fixture.getFilterData().groupIndex < 0) {
+                if (fixture.getFilterData().groupIndex == Constants.BOID_SENSE_GROUP) {
+                    return -1;
+                }
+            }
+
+            fixtures.add(fixture);
             return 0;
+        }
+
+        public boolean hit() {
+            boolean hit = fixtures.size() > 0;
+            fixtures.clear();
+            return hit;
         }
     }
 
     private final ArrayList<Body> boids = new ArrayList<>(100);
-    private final ArrayList<Body> obstacles = new ArrayList<>(100);
 
-    private final ArrayList<Fixture> rayCastFixtures = new ArrayList<>();
+    private final BoidRayCastCallback rayCastCallback = new BoidRayCastCallback(this);
 
     // Multi use vectors (prevent re-creation of objects)
     private final Vector2 sensePoint = new Vector2();
@@ -108,9 +120,6 @@ public class Boid extends BodyLinkedActor {
         if (toAdd.getUserData() instanceof Boid && !boids.contains(toAdd)) {
             boids.add(toAdd);
         }
-        else if (toAdd.getUserData() instanceof Obstacle && !obstacles.contains(toAdd)) {
-            obstacles.add(toAdd);
-        }
     }
 
     /**
@@ -121,25 +130,42 @@ public class Boid extends BodyLinkedActor {
         if (toRemove.getUserData() instanceof Boid) {
             boids.remove(toRemove);
         }
-        else if (toRemove.getUserData() instanceof Obstacle) {
-            obstacles.remove(toRemove);
+    }
+
+
+    /**
+     * Performs a ray cast from the center of this boid to the given point.
+     * @param toPoint The point to ray cast to.
+     * @return True if something is hit, false otherwise.
+     */
+    private boolean rayCast(Vector2 toPoint) {
+        Boids.getInstance().world.rayCast(rayCastCallback, getCenterPoint(), toPoint);
+        boolean retVal = rayCastCallback.hit();
+        drawRay(getCenterPoint(), toPoint, retVal);
+        return retVal;
+    }
+
+    /**
+     * Convenience method for drawing obstacle avoidance rays.
+     * @param fromPoint Point to draw from
+     * @param toPoint Point to draw too
+     * @param hit Whether the ray hit a fixture or not.
+     */
+    private void drawRay(Vector2 fromPoint, Vector2 toPoint, boolean hit) {
+        if (!Constants.DRAW_OBSTACLE_AVOIDANCE) return;
+        Boids.getInstance().shapeRenderer.setColor(Constants.COLOR_OBSTACLE_AVOIDANCE_MISS);
+        if (hit) {
+            Boids.getInstance().shapeRenderer.setColor(Constants.COLOR_OBSTACLE_AVOIDANCE_HIT);
         }
+        Boids.getInstance().shapeRenderer.line(fromPoint, toPoint);
     }
 
-
-    private void addRayCastFixture(Fixture fixture) {
-        rayCastFixtures.add(fixture);
-    }
-
-    private boolean rayCastFixtureDetected() {
-        boolean result = rayCastFixtures.size() > 0;
-        rayCastFixtures.clear();
-        return result;
-    }
-
-
+    /**
+     * Ray casts directly forward and checks if an obstacle is found.
+     * @return Whether there is an obstacle that requires avoidance.
+     */
     private boolean obstaclesToAvoid() {
-        return obstacles.size() > 0;
+        return rayCast(getSensePoint(Constants.INITIAL_ESCAPE_ANGLE)) || rayCast(getSensePoint(-Constants.INITIAL_ESCAPE_ANGLE));
     }
 
 
@@ -209,6 +235,37 @@ public class Boid extends BodyLinkedActor {
     }
 
 
+
+    /**
+     * Obstacle avoidance behavior method.
+     * Should be called from the act method.
+     */
+    private void avoidObstacles() {
+        Vector2 centerPoint = getCenterPoint();
+        Vector2 sensePoint = getSensePoint();
+        float initialAngle = Constants.INITIAL_ESCAPE_ANGLE;
+        float angleStep = (180 - initialAngle) / Constants.ESCAPE_STEPS;
+
+        for (int i = 1; i < Constants.ESCAPE_STEPS; i++) {
+            float angle = initialAngle + angleStep * i;
+
+            // Left side ray cast
+            sensePoint = getSensePoint(angle);
+            if (!rayCast(sensePoint)) {
+                turnTowards(sensePoint.sub(centerPoint));
+                break;
+            }
+
+            // Right side ray cast
+            sensePoint = getSensePoint(-angle);
+            if (!rayCast(sensePoint)) {
+                turnTowards(sensePoint.sub(centerPoint));
+                break;
+            }
+        }
+    }
+
+
     @Override
     protected TextureRegion getFrame() {
         return Boids.getInstance().boidTexture;
@@ -219,8 +276,14 @@ public class Boid extends BodyLinkedActor {
         super.act(delta);
         setColor(Constants.BOID_COLOR);
 
-        // Based on: https://www.cs.toronto.edu/~dt/siggraph97-course/cwr87/
+        // region Obstacle Avoidance
+        if (obstaclesToAvoid()) {
+            avoidObstacles();
+            return;
+        }
+        // endregion
 
+        // Based on: https://www.cs.toronto.edu/~dt/siggraph97-course/cwr87/
         // region Calculate separation force
         Vector2 sepForce = new Vector2();
         Vector2 toBoid = new Vector2();
@@ -289,49 +352,4 @@ public class Boid extends BodyLinkedActor {
 
         turnTowards(delta, vel);
     }
-
-    /**
-     * Obstacle avoidance behavior method.
-     * Should be called from the act method.
-     */
-    /*private void avoidObstacles() {
-        if (obstaclesToAvoid()) {
-            // RayCast forward to see if path is clear.
-            World world = Boids.getInstance().world;
-            Vector2 fromPoint = getCenterPoint();
-            Vector2 sensePoint = getSensePoint();
-
-            world.rayCast(new BoidRayCastCallback(this), fromPoint, sensePoint);
-            if (rayCastFixtureDetected()) {
-                drawRay(fromPoint, sensePoint, true);
-                for (int i = 0; i < Constants.BOID_ESCAPE_STEPS; i++) {
-                    float degrees = (180f / Constants.BOID_ESCAPE_STEPS) * i;
-
-                    // Left side ray cast
-                    sensePoint = getSensePoint(degrees);
-                    world.rayCast(new BoidRayCastCallback(this), fromPoint, sensePoint);
-                    if (!rayCastFixtureDetected()) {
-                        drawRay(fromPoint, sensePoint, false);
-                        turnTowards(getRotation() + degrees);
-                        break;
-                    } else {
-                        drawRay(fromPoint, sensePoint, true);
-                    }
-
-                    // Right side ray cast
-                    sensePoint = getSensePoint(-degrees);
-                    world.rayCast(new BoidRayCastCallback(this), fromPoint, sensePoint);
-                    if (!rayCastFixtureDetected()) {
-                        drawRay(fromPoint, sensePoint, false);
-                        turnTowards(getRotation() - degrees);
-                        break;
-                    } else {
-                        drawRay(fromPoint, sensePoint, true);
-                    }
-                }
-            } else {
-                drawRay(fromPoint, sensePoint, false);
-            }
-        }
-    }*/
 }

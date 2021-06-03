@@ -21,6 +21,12 @@ public abstract class Constants {
     public static float SENSE_RADIUS = 1f;
     public static int ESCAPE_STEPS = 6;
     /**
+     * Angle at which an obstacle in front of a boid must be avoided (in degrees)
+     * For example, with a value of 15, -15 and 15 degrees will be checked,
+     * if an obstacle is detected, the boid will attempt to divert away.
+     */
+    public static float INITIAL_ESCAPE_ANGLE = 15;
+    /**
      * In degrees per second
      */
     public static int TURN_RATE = 240;
@@ -35,9 +41,12 @@ public abstract class Constants {
 
     // Debug drawing variables
     public static boolean DRAW_SEPARATION_FORCE = false;
-    public static boolean DRAW_VELOCITY_MATCH_FORCE = false;
-    public static boolean DRAW_FLOCK_CENTERING_FORCE = false;
     public static final Color COLOR_SEPARATION_FORCE = new Color(0, 1, 0, 1);
+    public static boolean DRAW_VELOCITY_MATCH_FORCE = false;
     public static final Color COLOR_VELOCITY_MATCH_FORCE = new Color(1, 0, 0, 1);
+    public static boolean DRAW_FLOCK_CENTERING_FORCE = false;
     public static final Color COLOR_FLOCK_CENTERING_FORCE = new Color(0, 0, 1, 1);
+    public static boolean DRAW_OBSTACLE_AVOIDANCE = false;
+    public static final Color COLOR_OBSTACLE_AVOIDANCE_HIT = new Color(1, 1, 0, 1);
+    public static final Color COLOR_OBSTACLE_AVOIDANCE_MISS = new Color(0, 1, 0, 1);
 }

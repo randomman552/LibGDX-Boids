@@ -135,14 +135,28 @@ public class UIStage extends Stage {
         // region Debug draw options
         Label debugHeaderLabel = new Label("Debug draw options:", skin);
         CheckBox drawPhysicsDebugCheckbox = new CheckBox("Draw physics", skin);
+        // Avoidance drawing checkbox
+        CheckBox drawObstacleAvoidanceCheckbox = new CheckBox("Draw avoidance", skin);
         // Force drawing checkboxes
         CheckBox drawSeparationForceCheckbox = new CheckBox("Draw separation force", skin);
         CheckBox drawVelMatchForceCheckbox = new CheckBox("Draw velocity match force", skin);
         CheckBox drawCenteringForceCheckbox = new CheckBox("Draw flock centering force", skin);
 
-        tableHeight += debugHeaderLabel.getHeight() + drawPhysicsDebugCheckbox.getHeight() * 4;
+        drawObstacleAvoidanceCheckbox.setChecked(Constants.DRAW_OBSTACLE_AVOIDANCE);
+        drawSeparationForceCheckbox.setChecked(Constants.DRAW_SEPARATION_FORCE);
+        drawVelMatchForceCheckbox.setChecked(Constants.DRAW_VELOCITY_MATCH_FORCE);
+        drawCenteringForceCheckbox.setChecked(Constants.DRAW_FLOCK_CENTERING_FORCE);
+
+        tableHeight += debugHeaderLabel.getHeight() + drawPhysicsDebugCheckbox.getHeight() * 5;
 
         // region Add input listeners
+        drawObstacleAvoidanceCheckbox.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                CheckBox checkBox = ((CheckBox) actor);
+                Constants.DRAW_OBSTACLE_AVOIDANCE = checkBox.isChecked();
+            }
+        });
         drawPhysicsDebugCheckbox.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -180,6 +194,8 @@ public class UIStage extends Stage {
 
         table.row();
         table.add(drawPhysicsDebugCheckbox).colspan(2).align(Align.left);
+        table.row();
+        table.add(drawObstacleAvoidanceCheckbox).colspan(2).align(Align.left);
         table.row();
         table.add(drawSeparationForceCheckbox).colspan(2).align(Align.left);
         table.row();
