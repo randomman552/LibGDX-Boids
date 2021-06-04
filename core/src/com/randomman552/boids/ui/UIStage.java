@@ -32,10 +32,18 @@ public class UIStage extends Stage {
             this.gSlider = gSlider;
             this.bSlider = bSlider;
             this.aSlider = aSlider;
+            updateSliders();
         }
 
         public ColorUpdateListener(Color color, Slider rSlider, Slider gSlider, Slider bSlider) {
             this(color, rSlider, gSlider, bSlider, null);
+        }
+
+        public void updateSliders() {
+            rSlider.setValue(color.r);
+            gSlider.setValue(color.g);
+            bSlider.setValue(color.b);
+            if (aSlider != null) aSlider.setValue(color.a);
         }
 
         @Override
@@ -204,8 +212,8 @@ public class UIStage extends Stage {
         table.add(drawCenteringForceCheckbox).colspan(2).align(Align.left);
         // endregion
 
-        // region Boid color options
-        Label boidColors = new Label("Boid Colors", skin);
+        // region Foreground color options
+        Label boidColors = new Label("Foreground color", skin);
         Label boidColorRedLabel = new Label("Red:", skin);
         Slider boidColorRedSlider = new Slider(0, 1, 0.01f,false, skin);
         Label boidColorGreenLabel = new Label("Green:", skin);
@@ -215,14 +223,9 @@ public class UIStage extends Stage {
         Label boidColorAlphaLabel = new Label("Alpha:", skin);
         Slider boidColorAlphaSlider = new Slider(0, 1, 0.01f,false, skin);
 
-        boidColorRedSlider.setValue(Constants.BOID_COLOR.r);
-        boidColorGreenSlider.setValue(Constants.BOID_COLOR.g);
-        boidColorBlueSlider.setValue(Constants.BOID_COLOR.b);
-        boidColorAlphaSlider.setValue(Constants.BOID_COLOR.a);
-
         // region Input listeners
         ColorUpdateListener boidColorUpdateListener = new ColorUpdateListener(
-                Constants.BOID_COLOR,
+                Constants.FOREGROUND_COLOR,
                 boidColorRedSlider,
                 boidColorGreenSlider,
                 boidColorBlueSlider,
@@ -249,17 +252,13 @@ public class UIStage extends Stage {
         // endregion
 
         // region Background color options
-        Label backgroundColorsLabel = new Label("Background colors", skin);
+        Label backgroundColorsLabel = new Label("Background color", skin);
         Label backgroundColorsRedLabel = new Label("Red", skin);
         Slider backgroundColorsRedSlider = new Slider(0, 1, 0.01f,false, skin);
         Label backgroundColorsGreenLabel = new Label("Green", skin);
         Slider backgroundColorsGreenSlider = new Slider(0, 1, 0.01f,false, skin);
         Label backgroundColorsBlueLabel = new Label("Blue", skin);
         Slider backgroundColorsBlueSlider = new Slider(0, 1, 0.01f,false, skin);
-
-        backgroundColorsRedSlider.setValue(Constants.BACKGROUND_COLOR.r);
-        backgroundColorsGreenSlider.setValue(Constants.BACKGROUND_COLOR.g);
-        backgroundColorsBlueSlider.setValue(Constants.BACKGROUND_COLOR.b);
 
         // region Input listeners
         ColorUpdateListener backgroundColorUpdateListener = new ColorUpdateListener(

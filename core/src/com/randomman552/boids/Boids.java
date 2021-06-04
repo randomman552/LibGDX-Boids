@@ -17,6 +17,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.randomman552.boids.boid.Boid;
 import com.randomman552.boids.boid.BoidContactListener;
 import com.randomman552.boids.obstacles.MapEdge;
+import com.randomman552.boids.obstacles.RectangleObstacle;
 import com.randomman552.boids.ui.UIStage;
 
 import java.util.Random;
@@ -99,6 +100,9 @@ public class Boids extends ApplicationAdapter {
 			Boid boid = new Boid(x, y, rotation);
 			stage.addActor(boid);
 		}
+
+		// Create obstacles
+		stage.addActor(new RectangleObstacle(Constants.WORLD_SIZE.x / 2, Constants.WORLD_SIZE.y / 2, 2, 2));
 	}
 
 	@Override

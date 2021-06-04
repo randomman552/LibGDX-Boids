@@ -64,7 +64,7 @@ public class Boid extends BodyLinkedActor {
     public Boid(float x, float y, float rotation) {
         setSize(Constants.BOID_SIZE.x, Constants.BOID_SIZE.y);
         setOrigin(Align.center);
-        setColor(Constants.BOID_COLOR);
+        setColor(Constants.FOREGROUND_COLOR);
 
         // Define body
         BodyDef bodyDef = new BodyDef();
@@ -274,7 +274,7 @@ public class Boid extends BodyLinkedActor {
     @Override
     public void act(float delta) {
         super.act(delta);
-        setColor(Constants.BOID_COLOR);
+        setColor(Constants.FOREGROUND_COLOR);
 
         // region Obstacle Avoidance
         if (obstaclesToAvoid()) {

@@ -6,9 +6,9 @@ import com.badlogic.gdx.math.Vector2;
 public abstract class Constants {
     public static final Vector2 WORLD_SIZE = new Vector2(16, 9);
 
-    // Boid appearance settings
+    // Appearance settings
     public static final Vector2 BOID_SIZE = new Vector2(0.10f, 0.20f);
-    public static final Color BOID_COLOR = new Color(1, 1, 1, 1);
+    public static final Color FOREGROUND_COLOR = new Color(1, 1, 1, 1);
     public static final Color BACKGROUND_COLOR = new Color(0, 0, 0, 1);
 
     // Sense groups to control Box2D collisions
