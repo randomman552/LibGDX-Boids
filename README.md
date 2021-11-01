@@ -32,12 +32,12 @@ certain radius of them, this radius is defined in [Constants.java](core/src/com/
 The behaviour of the boids can be controlled by editing the values in [Constants.java](core/src/com/randomman552/boids/Constants.java)
 
 The values in [Constants.java](core/src/com/randomman552/boids/Constants.java) can be adjusted during runtime using the 
-options menu which can be opened with the button in the top left of the screen.\ 
+options menu which can be opened with the button in the top left of the screen.\
 The values are not saved on program exit.
 
 ## Running the simulation
 The program can be run by downloading the Jar archive located in [releases](https://github.com/randomman552/LibGDX-Boids/releases/tag/latest).\
-You will require Java 11 in order to execute the program which you can do using the following command:
+Java 8 is required in order to execute the program which you can do using the following command:
 ```shell
 java -jar Boids.jar
 ```
